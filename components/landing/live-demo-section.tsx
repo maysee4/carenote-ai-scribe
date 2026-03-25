@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FadeIn } from '@/components/ui/fade-in'
 
 type IncidentType = 'medication' | 'behaviour'
 type ViewType = 'raw' | 'audit'
@@ -38,23 +40,30 @@ export function LiveDemoSection() {
   return (
     <section id="demo" className="py-20" style={{ backgroundColor: '#f0faf8' }}>
       <div className="max-w-5xl mx-auto px-6">
-        {/* Label */}
-        <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#0a7c6d' }}>
-          LIVE DEMO
-        </p>
-
-        <h2 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: '#0f1a1a' }}>
-          From <em className="font-serif italic">this</em> → to <em className="font-serif italic">this</em>
-        </h2>
-        <p className="text-lg mb-10" style={{ color: '#4a5568' }}>
-          In seconds. Not hours.
-        </p>
+        {/* Label + H2 + subtitle */}
+        <FadeIn>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#0a7c6d' }}>
+            LIVE DEMO
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: '#0f1a1a' }}>
+            From <em className="font-serif italic">this</em> → to <em className="font-serif italic">this</em>
+          </h2>
+          <p className="text-lg mb-10" style={{ color: '#4a5568' }}>
+            In seconds. Not hours.
+          </p>
+        </FadeIn>
 
         {/* Toggle row 1: Incident type */}
         <div className="flex gap-2 mb-3">
-          {(['medication', 'behaviour'] as IncidentType[]).map((type) => (
-            <button
+          {(['medication', 'behaviour'] as IncidentType[]).map((type, index) => (
+            <motion.button
               key={type}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, ease: 'easeOut', delay: index * 0.1 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setIncident(type)}
               className="rounded-full px-5 py-2 text-sm font-medium border transition-colors"
               style={
@@ -64,15 +73,21 @@ export function LiveDemoSection() {
               }
             >
               {type === 'medication' ? 'Medication Incident' : 'Behaviour Incident'}
-            </button>
+            </motion.button>
           ))}
         </div>
 
         {/* Toggle row 2: View type */}
         <div className="flex gap-2 mb-8">
-          {(['raw', 'audit'] as ViewType[]).map((v) => (
-            <button
+          {(['raw', 'audit'] as ViewType[]).map((v, index) => (
+            <motion.button
               key={v}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, ease: 'easeOut', delay: index * 0.1 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setView(v)}
               className="rounded-full px-5 py-2 text-sm font-medium border transition-colors"
               style={
@@ -82,60 +97,76 @@ export function LiveDemoSection() {
               }
             >
               {v === 'raw' ? 'Raw Staff Note' : 'Audit-Ready Evidence'}
-            </button>
+            </motion.button>
           ))}
         </div>
 
-        {/* Content card */}
+        {/* Content card with AnimatePresence */}
         <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
-          {view === 'raw' ? (
-            <div className="p-8">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500"></span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-red-500">
-                  Raw shift note — as written by staff
-                </span>
-              </div>
-              <p className="text-base leading-relaxed italic" style={{ color: '#4a5568' }}>
-                &ldquo;{rawNotes[incident]}&rdquo;
-              </p>
-            </div>
-          ) : (
-            <div className="p-8">
-              {/* High confidence badge + NDIS tags */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
-                  style={{ backgroundColor: '#d1fae5', color: '#065f46' }}
-                >
-                  <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
-                  High Confidence
-                </span>
-                {content.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full px-3 py-1 text-xs font-medium border"
-                    style={{ borderColor: '#0a7c6d', color: '#0a7c6d', backgroundColor: '#f0faf8' }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* Report body */}
-              <p className="text-sm leading-relaxed mb-6" style={{ color: '#0f1a1a' }}>
-                {content.body}
-              </p>
-
-              {/* Footer warning */}
-              <div
-                className="rounded-lg p-4 text-sm font-medium"
-                style={{ backgroundColor: '#fff7ed', color: '#92400e', borderLeft: '4px solid #f59e0b' }}
+          <AnimatePresence mode="wait">
+            {view === 'raw' ? (
+              <motion.div
+                key={`raw-${incident}`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="p-8"
               >
-                {content.footer}
-              </div>
-            </div>
-          )}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-red-500">
+                    Raw shift note — as written by staff
+                  </span>
+                </div>
+                <p className="text-base leading-relaxed italic" style={{ color: '#4a5568' }}>
+                  &ldquo;{rawNotes[incident]}&rdquo;
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={`audit-${incident}`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="p-8"
+              >
+                {/* High confidence badge + NDIS tags */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                    style={{ backgroundColor: '#d1fae5', color: '#065f46' }}
+                  >
+                    <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
+                    High Confidence
+                  </span>
+                  {content.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full px-3 py-1 text-xs font-medium border"
+                      style={{ borderColor: '#0a7c6d', color: '#0a7c6d', backgroundColor: '#f0faf8' }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Report body */}
+                <p className="text-sm leading-relaxed mb-6" style={{ color: '#0f1a1a' }}>
+                  {content.body}
+                </p>
+
+                {/* Footer warning */}
+                <div
+                  className="rounded-lg p-4 text-sm font-medium"
+                  style={{ backgroundColor: '#fff7ed', color: '#92400e', borderLeft: '4px solid #f59e0b' }}
+                >
+                  {content.footer}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </section>

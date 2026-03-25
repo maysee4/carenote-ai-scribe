@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { FileText, Heart, ClipboardList } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FadeIn } from '@/components/ui/fade-in'
 
 type TabType = 'support' | 'nurse' | 'smart'
 
@@ -66,25 +68,31 @@ export function AIAgentsSection() {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-5xl mx-auto px-6">
-        {/* Label */}
-        <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#0a7c6d' }}>
-          AI AGENTS
-        </p>
-
-        <h2 className="text-3xl sm:text-4xl font-bold mb-3" style={{ color: '#0f1a1a' }}>
-          We don&apos;t just clean notes —{' '}
-          <em className="font-serif italic">we complete your documentation for you.</em>
-        </h2>
-
-        <p className="text-lg mb-10" style={{ color: '#4a5568' }}>
-          AI Agents built for every NDIS form
-        </p>
+        {/* Label + H2 + subtitle */}
+        <FadeIn>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#0a7c6d' }}>
+            AI AGENTS
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-3" style={{ color: '#0f1a1a' }}>
+            We don&apos;t just clean notes —{' '}
+            <em className="font-serif italic">we complete your documentation for you.</em>
+          </h2>
+          <p className="text-lg mb-10" style={{ color: '#4a5568' }}>
+            AI Agents built for every NDIS form
+          </p>
+        </FadeIn>
 
         {/* Tab pills */}
         <div className="flex flex-wrap gap-2 mb-10">
-          {tabs.map((tab) => (
-            <button
+          {tabs.map((tab, index) => (
+            <motion.button
               key={tab.id}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, ease: 'easeOut', delay: index * 0.1 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setActiveTab(tab.id)}
               className="rounded-full px-5 py-2.5 text-sm font-medium border transition-colors inline-flex items-center gap-2"
               style={
@@ -95,26 +103,37 @@ export function AIAgentsSection() {
             >
               <tab.icon className="h-4 w-4" />
               {tab.label}
-            </button>
+            </motion.button>
           ))}
         </div>
 
-        {/* Content grid */}
-        <div className="grid sm:grid-cols-2 gap-6">
-          {tabContent[activeTab].map((item) => (
-            <div
-              key={item.title}
-              className="rounded-2xl border border-gray-200 bg-white p-6"
-            >
-              <h3 className="text-base font-bold mb-2" style={{ color: '#0f1a1a' }}>
-                {item.title}
-              </h3>
-              <p className="text-sm leading-relaxed" style={{ color: '#4a5568' }}>
-                {item.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        {/* Content grid with AnimatePresence */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="grid sm:grid-cols-2 gap-6"
+          >
+            {tabContent[activeTab].map((item) => (
+              <motion.div
+                key={item.title}
+                whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.1)' }}
+                transition={{ duration: 0.2 }}
+                className="rounded-2xl border border-gray-200 bg-white p-6 cursor-default"
+              >
+                <h3 className="text-base font-bold mb-2" style={{ color: '#0f1a1a' }}>
+                  {item.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: '#4a5568' }}>
+                  {item.description}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </section>
   )
