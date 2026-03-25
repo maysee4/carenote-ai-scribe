@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import Script from 'next/script'
 
 export default function BookPage() {
   return (
@@ -14,8 +14,7 @@ export default function BookPage() {
           className="text-sm font-medium flex items-center gap-1 transition-colors"
           style={{ color: '#4a5568' }}
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to site
+          Back to site →
         </Link>
       </nav>
 
@@ -24,31 +23,28 @@ export default function BookPage() {
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* Left side */}
           <div>
-            {/* Badge */}
             <div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8 text-sm font-medium border"
               style={{ borderColor: '#0a7c6d', color: '#0a7c6d', backgroundColor: '#f0faf8' }}
             >
-              Book Your Setup Call
+              • Book Your Setup Call
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-bold mb-6 leading-tight" style={{ color: '#0f1a1a' }}>
               See how CareNote AI works{' '}
-              <em className="font-serif italic" style={{ color: '#0a7c6d' }}>
+              <span className="font-serif italic" style={{ color: '#0a7c6d' }}>
                 in your business.
-              </em>
+              </span>
             </h1>
 
             <p className="text-base leading-relaxed mb-10" style={{ color: '#4a5568' }}>
               This is a free, no-obligation walkthrough. We&apos;ll show you exactly how your team&apos;s shift notes become structured, NDIS-aligned reports — and how much time you&apos;ll save.
             </p>
 
-            {/* What to expect */}
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#0a7c6d' }}>
               WHAT TO EXPECT
             </p>
 
-            {/* Pill badges */}
             <div className="flex flex-wrap gap-2 mb-8">
               {['15 minutes', 'Video call', 'No obligation'].map((pill) => (
                 <span
@@ -61,24 +57,11 @@ export default function BookPage() {
               ))}
             </div>
 
-            {/* Steps */}
             <div className="space-y-6 mb-10">
               {[
-                {
-                  num: '01',
-                  title: 'Pick a Time',
-                  desc: 'Choose a 15-minute slot that works for you. We\'ll confirm instantly.',
-                },
-                {
-                  num: '02',
-                  title: 'Quick Discovery',
-                  desc: 'We\'ll review your current documentation workflow and identify where time is being lost.',
-                },
-                {
-                  num: '03',
-                  title: 'Live Walkthrough',
-                  desc: 'See CareNote AI turn one of your real shift notes into an audit-ready report — in under 2 minutes.',
-                },
+                { num: '01', title: 'Pick a Time', desc: "Choose a 15-minute slot that works for you. We'll confirm instantly." },
+                { num: '02', title: 'Quick Discovery', desc: "We'll review your current documentation workflow and identify where time is being lost." },
+                { num: '03', title: 'Live Walkthrough', desc: "See CareNote AI turn one of your real shift notes into an audit-ready report — in under 2 minutes." },
               ].map((step) => (
                 <div key={step.num} className="flex gap-4">
                   <div
@@ -88,12 +71,8 @@ export default function BookPage() {
                     {step.num}
                   </div>
                   <div>
-                    <p className="font-semibold mb-1" style={{ color: '#0f1a1a' }}>
-                      {step.title}
-                    </p>
-                    <p className="text-sm leading-relaxed" style={{ color: '#4a5568' }}>
-                      {step.desc}
-                    </p>
+                    <p className="font-semibold mb-1" style={{ color: '#0f1a1a' }}>{step.title}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: '#4a5568' }}>{step.desc}</p>
                   </div>
                 </div>
               ))}
@@ -105,20 +84,18 @@ export default function BookPage() {
           </div>
 
           {/* Right side: GHL calendar embed */}
-          <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white shadow-sm min-h-[600px]">
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
             <iframe
               src="https://api.elevanaimarketing.com/widget/booking/cVV0q4baPRiKMHplrkqg"
-              style={{ width: '100%', border: 'none', overflow: 'hidden', minHeight: '600px' }}
-              scrolling="no"
+              style={{ width: '100%', border: 'none', minHeight: '900px', display: 'block' }}
+              scrolling="yes"
               id="cVV0q4baPRiKMHplrkqg_1774478858100"
-            />
-            <script
-              src="https://api.elevanaimarketing.com/js/form_embed.js"
-              type="text/javascript"
             />
           </div>
         </div>
       </div>
+
+      <Script src="https://api.elevanaimarketing.com/js/form_embed.js" strategy="lazyOnload" />
     </div>
   )
 }

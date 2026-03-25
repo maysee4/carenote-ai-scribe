@@ -18,7 +18,7 @@ export function HeroSection() {
           </div>
 
           {/* H1 */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-8 tracking-tight" style={{ color: '#0d1f1e' }}>
+          <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-8 tracking-tight" style={{ color: '#0d1f1e' }}>
             Turn messy shift notes, voice recordings, and incomplete forms into fully completed, audit-ready NDIS documentation —{' '}
             <span className="font-serif italic" style={{ color: '#0a7c6d' }}>in minutes.</span>
           </h1>
