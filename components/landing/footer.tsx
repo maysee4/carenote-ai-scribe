@@ -1,20 +1,27 @@
 import Link from 'next/link'
-import { Brain } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-100 py-10">
-      <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[hsl(173,80%,30%)]">
-            <Brain className="h-3.5 w-3.5 text-white" />
-          </div>
-          <span className="font-semibold text-sm text-gray-800">CareNote AI</span>
+    <footer className="py-10 px-6" style={{ backgroundColor: '#1e3347' }}>
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Logo */}
+        <Link href="/" className="text-xl font-bold text-white">
+          CareNote<span style={{ color: '#4db8a8' }}>.</span>
         </Link>
-        <p className="text-xs text-gray-400">© {new Date().getFullYear()} CareNote AI. All rights reserved.</p>
-        <div className="flex gap-5">
-          <Link href="/login" className="text-xs text-gray-500 hover:text-gray-800">Login</Link>
-          <Link href="/signup" className="text-xs text-gray-500 hover:text-gray-800">Sign up</Link>
+
+        {/* Center */}
+        <p className="text-sm text-center" style={{ color: '#a0b8c8' }}>
+          © 2026 CareNote AI. Built in Sydney for Australian SIL providers.
+        </p>
+
+        {/* Right links */}
+        <div className="flex gap-6">
+          <Link href="/privacy" className="text-sm hover:text-white transition-colors" style={{ color: '#a0b8c8' }}>
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="text-sm hover:text-white transition-colors" style={{ color: '#a0b8c8' }}>
+            Terms
+          </Link>
         </div>
       </div>
     </footer>

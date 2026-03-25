@@ -31,21 +31,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#f0faf8' }}>
       <div className="w-full max-w-md">
+        {/* Logo */}
         <div className="flex justify-center mb-8">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(173,80%,30%)]">
-              <Brain className="h-5 w-5 text-white" />
+          <Link href="/" className="flex items-center gap-3">
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-xl"
+              style={{ backgroundColor: '#0a7c6d' }}
+            >
+              <Brain className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-semibold">CareNote AI</span>
-          </div>
+            <span className="text-2xl font-bold" style={{ color: '#0f1a1a' }}>
+              CareNote<span style={{ color: '#0a7c6d' }}>.</span>
+            </span>
+          </Link>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold">Welcome back</h1>
-            <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
+            <h1 className="text-2xl font-bold" style={{ color: '#0f1a1a' }}>Welcome back</h1>
+            <p className="text-sm mt-1" style={{ color: '#4a5568' }}>
+              Sign in to access your care reports.
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -71,14 +79,23 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full rounded-full font-semibold"
+              style={{ backgroundColor: '#0a7c6d' }}
+              disabled={loading}
+            >
               {loading ? 'Signing in…' : 'Sign In'}
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="mt-4 text-center text-sm" style={{ color: '#4a5568' }}>
             No account?{' '}
-            <Link href="/signup" className="text-[hsl(173,80%,30%)] hover:underline font-medium">
+            <Link
+              href="/signup"
+              className="font-medium hover:underline"
+              style={{ color: '#0a7c6d' }}
+            >
               Create one
             </Link>
           </p>
