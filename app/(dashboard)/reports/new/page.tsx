@@ -9,10 +9,29 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Mic, Square, Loader2, FileText, ArrowLeft } from 'lucide-react'
+import { Mic, Square, Loader2, FileText, ArrowLeft, Keyboard } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatDuration } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+
+const TEMPLATE = `Client name:
+Date of visit/shift:
+Support worker:
+
+Activities completed:
+-
+
+Client's mood and wellbeing:
+
+
+Any incidents or concerns:
+
+
+Medications administered:
+
+
+Follow-up actions required:
+`
 
 export default function NewReportPage() {
   const router = useRouter()
@@ -26,6 +45,7 @@ export default function NewReportPage() {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [transcript, setTranscript] = useState('')
   const [loading, setLoading] = useState(false)
+  const [mode, setMode] = useState<'record' | 'type'>('record')
 
   const mediaRecorder = useRef<MediaRecorder | null>(null)
   const chunks = useRef<Blob[]>([])
@@ -89,12 +109,11 @@ export default function NewReportPage() {
     recognition.current?.stop()
     if (timer.current) clearInterval(timer.current)
     setIsRecording(false)
-    // Persist final transcript
     setTranscript((prev) => finalTranscript.current.trim() || prev)
   }, [])
 
   async function handleGenerate() {
-    if (!transcript.trim()) return toast.error('No transcript — please record something first')
+    if (!transcript.trim()) return toast.error('No notes — record or type something first')
     if (!title.trim()) return toast.error('Please add a report title')
     setLoading(true)
 
@@ -160,7 +179,7 @@ export default function NewReportPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold">New Report</h1>
-          <p className="text-sm text-muted-foreground">Record your voice — transcript appears live — generate</p>
+          <p className="text-sm text-muted-foreground">Record your voice or type your notes — Claude generates the report</p>
         </div>
       </motion.div>
 
@@ -198,112 +217,146 @@ export default function NewReportPage() {
         </div>
       </motion.div>
 
-      {/* Record + live transcript */}
+      {/* Mode toggle */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="rounded-xl border border-border bg-card p-6 mb-5"
+        className="flex rounded-xl border border-border bg-card p-1 mb-5 gap-1"
       >
-        <div className="flex flex-col items-center gap-4 py-2">
-          <motion.button
-            onClick={isRecording ? stopRecording : startRecording}
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.94 }}
-            transition={{ duration: 0.15 }}
+        {(['record', 'type'] as const).map((m) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
             className={cn(
-              'flex h-20 w-20 items-center justify-center rounded-full focus:outline-none focus:ring-4 focus:ring-ring/40 transition-colors',
-              isRecording ? 'bg-red-500' : 'bg-[hsl(173,80%,30%)]'
+              'flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all',
+              mode === m
+                ? 'bg-[hsl(173,80%,30%)] text-white shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <motion.div
-              animate={isRecording ? { scale: [1, 1.12, 1] } : { scale: 1 }}
-              transition={{ repeat: isRecording ? Infinity : 0, duration: 1.2 }}
-            >
-              {isRecording
-                ? <Square className="h-7 w-7 text-white" />
-                : <Mic className="h-7 w-7 text-white" />
-              }
-            </motion.div>
-          </motion.button>
-
-          <AnimatePresence mode="wait">
-            {isRecording ? (
-              <motion.div
-                key="rec"
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                className="flex flex-col items-center gap-1"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-sm font-mono font-medium">{formatDuration(duration)}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Speaking… tap to stop</p>
-              </motion.div>
-            ) : (
-              <motion.p
-                key="idle"
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                className="text-sm text-muted-foreground"
-              >
-                {audioBlob ? `Recording ready · ${formatDuration(duration)}` : 'Tap to start recording'}
-              </motion.p>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Live / editable transcript */}
-        <AnimatePresence>
-          {(transcript.length > 0 || isRecording) && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-5 overflow-hidden"
-            >
-              <Label className="text-xs text-muted-foreground mb-2 block">
-                {isRecording ? '🎙 Live transcript' : 'Transcript (you can edit before generating)'}
-              </Label>
-              <Textarea
-                value={transcript}
-                onChange={(e) => setTranscript(e.target.value)}
-                placeholder="Your words will appear here as you speak…"
-                rows={5}
-                className="text-sm resize-none"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {!isRecording && !audioBlob && !hasTranscript && (
-          <p className="text-xs text-center text-muted-foreground mt-4">
-            Or type your notes directly in the transcript box above after tapping record.
-          </p>
-        )}
-
-        {/* Manual transcript fallback */}
-        {!isRecording && !hasTranscript && audioBlob === null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-4"
-          >
-            <button
-              onClick={() => setTranscript(' ')}
-              className="text-xs text-[hsl(173,80%,30%)] hover:underline w-full text-center"
-            >
-              Type notes manually instead →
-            </button>
-          </motion.div>
-        )}
+            {m === 'record' ? <Mic className="h-4 w-4" /> : <Keyboard className="h-4 w-4" />}
+            {m === 'record' ? 'Record Audio' : 'Type Notes'}
+          </button>
+        ))}
       </motion.div>
 
-      {/* Generate Report — appears once there's a transcript */}
+      <AnimatePresence mode="wait">
+        {/* Record panel */}
+        {mode === 'record' && (
+          <motion.div
+            key="record"
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -12 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-xl border border-border bg-card p-6 mb-5"
+          >
+            <div className="flex flex-col items-center gap-4 py-2">
+              <motion.button
+                onClick={isRecording ? stopRecording : startRecording}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                transition={{ duration: 0.15 }}
+                className={cn(
+                  'flex h-20 w-20 items-center justify-center rounded-full focus:outline-none focus:ring-4 focus:ring-ring/40 transition-colors',
+                  isRecording ? 'bg-red-500' : 'bg-[hsl(173,80%,30%)]'
+                )}
+              >
+                <motion.div
+                  animate={isRecording ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+                  transition={{ repeat: isRecording ? Infinity : 0, duration: 1.2 }}
+                >
+                  {isRecording
+                    ? <Square className="h-7 w-7 text-white" />
+                    : <Mic className="h-7 w-7 text-white" />
+                  }
+                </motion.div>
+              </motion.button>
+
+              <AnimatePresence mode="wait">
+                {isRecording ? (
+                  <motion.div
+                    key="rec"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="flex flex-col items-center gap-1"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                      <span className="text-sm font-mono font-medium">{formatDuration(duration)}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Speaking… tap to stop</p>
+                  </motion.div>
+                ) : (
+                  <motion.p
+                    key="idle"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="text-sm text-muted-foreground"
+                  >
+                    {audioBlob ? `Recording ready · ${formatDuration(duration)}` : 'Tap to start recording'}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Live / editable transcript */}
+            <AnimatePresence>
+              {(transcript.length > 0 || isRecording) && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-5 overflow-hidden"
+                >
+                  <Label className="text-xs text-muted-foreground mb-2 block">
+                    {isRecording ? '🎙 Live transcript' : 'Transcript (editable before generating)'}
+                  </Label>
+                  <Textarea
+                    value={transcript}
+                    onChange={(e) => setTranscript(e.target.value)}
+                    placeholder="Your words will appear here as you speak…"
+                    rows={5}
+                    className="text-sm resize-none"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* Type panel */}
+        {mode === 'type' && (
+          <motion.div
+            key="type"
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 12 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-xl border border-border bg-card p-6 mb-5"
+          >
+            <Label className="font-semibold mb-1 block">Your Notes</Label>
+            <p className="text-xs text-muted-foreground mb-3">
+              Fill in as much or as little as you have — Claude will structure it into a full NDIS report.
+            </p>
+            <Textarea
+              value={transcript}
+              onChange={(e) => setTranscript(e.target.value)}
+              placeholder={TEMPLATE}
+              rows={14}
+              className="text-sm font-mono resize-none"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              You can use the template above or write freely — just describe what happened.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Generate Report button */}
       <AnimatePresence>
         {hasTranscript && !isRecording && (
           <motion.div
