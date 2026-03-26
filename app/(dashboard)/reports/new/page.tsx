@@ -59,7 +59,8 @@ export default function NewReportPage() {
         rec.interimResults = true
         rec.lang = 'en-AU'
         finalTranscript.current = ''
-        rec.onresult = (event) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        rec.onresult = (event: any) => {
           let interim = ''
           for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
