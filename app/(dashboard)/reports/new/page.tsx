@@ -9,30 +9,29 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Mic, MicOff, Square, Loader2, FileText, ArrowLeft, Wand2 } from 'lucide-react'
+import { Mic, Square, Loader2, FileText, ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatDuration } from '@/lib/utils'
-
-type Step = 'record' | 'transcribe' | 'generate' | 'done'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function NewReportPage() {
   const router = useRouter()
   const supabase = createClient()
   const { data: clients } = useClients()
 
-  const [step, setStep] = useState<Step>('record')
   const [title, setTitle] = useState('')
   const [clientId, setClientId] = useState<string>('')
   const [isRecording, setIsRecording] = useState(false)
   const [duration, setDuration] = useState(0)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [transcript, setTranscript] = useState('')
-  const [report, setReport] = useState('')
   const [loading, setLoading] = useState(false)
 
   const mediaRecorder = useRef<MediaRecorder | null>(null)
   const chunks = useRef<Blob[]>([])
-  const timer = useRef<NodeJS.Timeout | null>(null)
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const recognition = useRef<SpeechRecognition | null>(null)
+  const finalTranscript = useRef('')
 
   const startRecording = useCallback(async () => {
     try {
@@ -47,6 +46,33 @@ export default function NewReportPage() {
       }
       recorder.start(250)
       mediaRecorder.current = recorder
+
+      // Live transcription via Web Speech API
+      const SpeechRecognitionAPI =
+        (typeof window !== 'undefined' && (window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition)) || null
+
+      if (SpeechRecognitionAPI) {
+        const rec = new SpeechRecognitionAPI()
+        rec.continuous = true
+        rec.interimResults = true
+        rec.lang = 'en-AU'
+        finalTranscript.current = ''
+        rec.onresult = (event) => {
+          let interim = ''
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+              finalTranscript.current += event.results[i][0].transcript + ' '
+            } else {
+              interim += event.results[i][0].transcript
+            }
+          }
+          setTranscript(finalTranscript.current + interim)
+        }
+        rec.onerror = () => { /* silent — user may have revoked mic */ }
+        rec.start()
+        recognition.current = rec
+      }
+
       setIsRecording(true)
       setDuration(0)
       timer.current = setInterval(() => setDuration((d) => d + 1), 1000)
@@ -57,37 +83,18 @@ export default function NewReportPage() {
 
   const stopRecording = useCallback(() => {
     mediaRecorder.current?.stop()
+    recognition.current?.stop()
     if (timer.current) clearInterval(timer.current)
     setIsRecording(false)
-    setStep('transcribe')
+    // Persist final transcript
+    setTranscript((prev) => finalTranscript.current.trim() || prev)
   }, [])
 
-  async function handleTranscribe() {
-    if (!audioBlob) return
-    setLoading(true)
-    try {
-      const form = new FormData()
-      form.append('audio', audioBlob, 'recording.webm')
-      const res = await fetch('/api/transcribe', { method: 'POST', body: form })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      setTranscript(data.transcript)
-      setStep('generate')
-      toast.success('Transcription complete')
-    } catch (err) {
-      toast.error('Transcription failed — you can type the transcript manually')
-      setStep('generate')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   async function handleGenerate() {
-    if (!transcript.trim()) return toast.error('Transcript is empty')
+    if (!transcript.trim()) return toast.error('No transcript — please record something first')
     if (!title.trim()) return toast.error('Please add a report title')
     setLoading(true)
 
-    // Create report record
     const { data: { user } } = await supabase.auth.getUser()
     const { data: reportRecord, error } = await supabase
       .from('reports')
@@ -123,51 +130,44 @@ export default function NewReportPage() {
       if (!res.ok) throw new Error('Generation failed')
 
       const reader = res.body!.getReader()
-      const decoder = new TextDecoder()
-      let accumulated = ''
-
       while (true) {
-        const { done, value } = await reader.read()
+        const { done } = await reader.read()
         if (done) break
-        const text = decoder.decode(value)
-        const lines = text.split('\n')
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6)
-            if (data === '[DONE]') break
-            try {
-              const parsed = JSON.parse(data)
-              accumulated += parsed.text
-              setReport(accumulated)
-            } catch { /* ignore */ }
-          }
-        }
       }
 
-      setStep('done')
       toast.success('Report generated!')
       router.push(`/reports/${reportRecord.id}`)
     } catch {
       toast.error('Report generation failed')
-    } finally {
       setLoading(false)
     }
   }
 
+  const hasTranscript = transcript.trim().length > 0
+
   return (
-    <div className="p-8 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
+    <div className="p-8 max-w-2xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-3 mb-8"
+      >
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
           <h1 className="text-2xl font-bold">New Report</h1>
-          <p className="text-sm text-muted-foreground">Record audio · Transcribe · Generate</p>
+          <p className="text-sm text-muted-foreground">Record your voice — transcript appears live — generate</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Report details */}
-      <div className="rounded-xl border border-border bg-card p-6 mb-5">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="rounded-xl border border-border bg-card p-6 mb-5"
+      >
         <h2 className="font-semibold mb-4">Report Details</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -193,88 +193,147 @@ export default function NewReportPage() {
             </Select>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Step 1: Record */}
-      <div className="rounded-xl border border-border bg-card p-6 mb-5">
-        <h2 className="font-semibold mb-1">Step 1: Record Audio</h2>
-        <p className="text-sm text-muted-foreground mb-5">Press record and speak naturally about the visit.</p>
-
-        <div className="flex flex-col items-center gap-4">
-          <button
+      {/* Record + live transcript */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="rounded-xl border border-border bg-card p-6 mb-5"
+      >
+        <div className="flex flex-col items-center gap-4 py-2">
+          <motion.button
             onClick={isRecording ? stopRecording : startRecording}
-            disabled={step !== 'record' && !isRecording}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ duration: 0.15 }}
             className={cn(
-              'flex h-20 w-20 items-center justify-center rounded-full transition-all focus:outline-none focus:ring-4 focus:ring-ring/40',
-              isRecording
-                ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-                : 'bg-[hsl(173,80%,30%)] hover:bg-[hsl(173,80%,25%)]',
-              (step !== 'record' && !isRecording) && 'opacity-40 cursor-not-allowed'
+              'flex h-20 w-20 items-center justify-center rounded-full focus:outline-none focus:ring-4 focus:ring-ring/40 transition-colors',
+              isRecording ? 'bg-red-500' : 'bg-[hsl(173,80%,30%)]'
             )}
           >
-            {isRecording ? <Square className="h-8 w-8 text-white" /> : <Mic className="h-8 w-8 text-white" />}
-          </button>
-          {isRecording && (
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-sm font-mono">{formatDuration(duration)}</span>
-            </div>
-          )}
-          {audioBlob && !isRecording && (
-            <p className="text-sm text-muted-foreground">
-              Recording ready ({formatDuration(duration)})
-            </p>
-          )}
-          <p className="text-xs text-muted-foreground">
-            {isRecording ? 'Click to stop recording' : 'Click to start recording'}
-          </p>
+            <motion.div
+              animate={isRecording ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+              transition={{ repeat: isRecording ? Infinity : 0, duration: 1.2 }}
+            >
+              {isRecording
+                ? <Square className="h-7 w-7 text-white" />
+                : <Mic className="h-7 w-7 text-white" />
+              }
+            </motion.div>
+          </motion.button>
+
+          <AnimatePresence mode="wait">
+            {isRecording ? (
+              <motion.div
+                key="rec"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="flex flex-col items-center gap-1"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-sm font-mono font-medium">{formatDuration(duration)}</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Speaking… tap to stop</p>
+              </motion.div>
+            ) : (
+              <motion.p
+                key="idle"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="text-sm text-muted-foreground"
+              >
+                {audioBlob ? `Recording ready · ${formatDuration(duration)}` : 'Tap to start recording'}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
 
-      {/* Step 2: Transcribe */}
-      <div className={cn('rounded-xl border border-border bg-card p-6 mb-5 transition-opacity', step === 'record' && 'opacity-50')}>
-        <h2 className="font-semibold mb-1">Step 2: Transcribe</h2>
-        <p className="text-sm text-muted-foreground mb-4">Convert your recording to text, or type/paste manually.</p>
+        {/* Live / editable transcript */}
+        <AnimatePresence>
+          {(transcript.length > 0 || isRecording) && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-5 overflow-hidden"
+            >
+              <Label className="text-xs text-muted-foreground mb-2 block">
+                {isRecording ? '🎙 Live transcript' : 'Transcript (you can edit before generating)'}
+              </Label>
+              <Textarea
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                placeholder="Your words will appear here as you speak…"
+                rows={5}
+                className="text-sm resize-none"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {step === 'transcribe' && !transcript && (
-          <Button onClick={handleTranscribe} disabled={loading || !audioBlob} className="mb-4 gap-2">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-            {loading ? 'Transcribing…' : 'Transcribe with AI'}
-          </Button>
+        {!isRecording && !audioBlob && !hasTranscript && (
+          <p className="text-xs text-center text-muted-foreground mt-4">
+            Or type your notes directly in the transcript box above after tapping record.
+          </p>
         )}
 
-        <Textarea
-          placeholder="Transcript will appear here, or type it manually…"
-          value={transcript}
-          onChange={(e) => {
-            setTranscript(e.target.value)
-            if (step === 'record') setStep('transcribe')
-            if (e.target.value && step === 'transcribe') setStep('generate')
-          }}
-          rows={6}
-        />
-      </div>
-
-      {/* Step 3: Generate */}
-      <div className={cn('rounded-xl border border-border bg-card p-6', (step === 'record' || step === 'transcribe' && !transcript) && 'opacity-50')}>
-        <h2 className="font-semibold mb-1">Step 3: Generate Report</h2>
-        <p className="text-sm text-muted-foreground mb-4">Claude will transform your transcript into a professional care report.</p>
-
-        <Button
-          onClick={handleGenerate}
-          disabled={loading || !transcript.trim() || !title.trim()}
-          className="gap-2"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-          {loading ? 'Generating…' : 'Generate Report'}
-        </Button>
-
-        {report && (
-          <div className="mt-4 rounded-lg bg-muted p-4 text-sm whitespace-pre-wrap font-mono max-h-64 overflow-y-auto">
-            {report}
-          </div>
+        {/* Manual transcript fallback */}
+        {!isRecording && !hasTranscript && audioBlob === null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-4"
+          >
+            <button
+              onClick={() => setTranscript(' ')}
+              className="text-xs text-[hsl(173,80%,30%)] hover:underline w-full text-center"
+            >
+              Type notes manually instead →
+            </button>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
+
+      {/* Generate Report — appears once there's a transcript */}
+      <AnimatePresence>
+        {hasTranscript && !isRecording && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.button
+              onClick={handleGenerate}
+              disabled={loading || !title.trim()}
+              whileHover={!loading && title.trim() ? { scale: 1.02 } : {}}
+              whileTap={!loading && title.trim() ? { scale: 0.97 } : {}}
+              transition={{ duration: 0.15 }}
+              className={cn(
+                'w-full flex items-center justify-center gap-2 rounded-xl py-4 text-base font-semibold text-white transition-opacity',
+                loading || !title.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
+              )}
+              style={{ backgroundColor: '#0a7c6d' }}
+            >
+              {loading
+                ? <><Loader2 className="h-5 w-5 animate-spin" /> Generating Report…</>
+                : <><FileText className="h-5 w-5" /> Generate Report</>
+              }
+            </motion.button>
+            {!title.trim() && (
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Add a report title above to generate
+              </p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

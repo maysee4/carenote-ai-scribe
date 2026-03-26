@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
   FileText,
@@ -12,7 +14,6 @@ import {
   Trash2,
   Plus,
   LogOut,
-  Brain,
 } from 'lucide-react'
 
 const navItems = [
@@ -41,21 +42,23 @@ export function Sidebar() {
     <aside className="flex h-full w-64 flex-col bg-[hsl(215,25%,27%)]">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-[hsl(215,25%,22%)]">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(173,80%,30%)]">
-          <Brain className="h-4 w-4 text-white" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden bg-white/10">
+          <Image src="/logos/carenote.png" alt="CareNote" width={28} height={28} className="object-contain" />
         </div>
-        <span className="text-[15px] font-semibold text-white">CareNote AI</span>
+        <span className="text-[15px] font-semibold text-white">CareNote<span style={{ color: '#4db8aa' }}>.</span></span>
       </div>
 
       {/* New Report button */}
       <div className="px-4 py-4">
-        <Link
-          href="/reports/new"
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[hsl(173,80%,30%)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[hsl(173,80%,25%)]"
-        >
-          <Plus className="h-4 w-4" />
-          New Report
-        </Link>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15 }}>
+          <Link
+            href="/reports/new"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[hsl(173,80%,30%)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[hsl(173,80%,25%)]"
+          >
+            <Plus className="h-4 w-4" />
+            New Report
+          </Link>
+        </motion.div>
       </div>
 
       {/* Main nav */}
@@ -63,19 +66,20 @@ export function Sidebar() {
         {navItems.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + '/')
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
-                active
-                  ? 'bg-[hsl(215,25%,33%)] text-white'
-                  : 'text-[hsl(210,20%,75%)] hover:bg-[hsl(215,25%,33%)] hover:text-white'
-              )}
-            >
-              <item.icon className="h-4 w-4 shrink-0" />
-              {item.label}
-            </Link>
+            <motion.div key={item.href} whileHover={{ x: 2 }} transition={{ duration: 0.15 }}>
+              <Link
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
+                  active
+                    ? 'bg-[hsl(215,25%,33%)] text-white'
+                    : 'text-[hsl(210,20%,75%)] hover:bg-[hsl(215,25%,33%)] hover:text-white'
+                )}
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                {item.label}
+              </Link>
+            </motion.div>
           )
         })}
       </nav>
@@ -85,28 +89,31 @@ export function Sidebar() {
         {bottomItems.map((item) => {
           const active = pathname === item.href
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
-                active
-                  ? 'bg-[hsl(215,25%,33%)] text-white'
-                  : 'text-[hsl(210,20%,75%)] hover:bg-[hsl(215,25%,33%)] hover:text-white'
-              )}
-            >
-              <item.icon className="h-4 w-4 shrink-0" />
-              {item.label}
-            </Link>
+            <motion.div key={item.href} whileHover={{ x: 2 }} transition={{ duration: 0.15 }}>
+              <Link
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
+                  active
+                    ? 'bg-[hsl(215,25%,33%)] text-white'
+                    : 'text-[hsl(210,20%,75%)] hover:bg-[hsl(215,25%,33%)] hover:text-white'
+                )}
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                {item.label}
+              </Link>
+            </motion.div>
           )
         })}
-        <button
+        <motion.button
           onClick={handleSignOut}
+          whileHover={{ x: 2 }}
+          transition={{ duration: 0.15 }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[hsl(210,20%,75%)] transition-colors hover:bg-[hsl(215,25%,33%)] hover:text-white"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           Sign Out
-        </button>
+        </motion.button>
       </div>
     </aside>
   )
