@@ -14,24 +14,7 @@ import { toast } from 'sonner'
 import { cn, formatDuration } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const TEMPLATE = `Client name:
-Date of visit/shift:
-Support worker:
-
-Activities completed:
--
-
-Client's mood and wellbeing:
-
-
-Any incidents or concerns:
-
-
-Medications administered:
-
-
-Follow-up actions required:
-`
+const TEMPLATE = `sarah missed her morning meds again, she was still sleeping when i came at 7. tried to wake her up but she said go away. gave meds at 9:30 instead. she was bit drowsy after. called the house manager about it. also her skin looks dry need cream maybe. she ate lunch ok.`
 
 export default function NewReportPage() {
   const router = useRouter()
@@ -340,18 +323,15 @@ export default function NewReportPage() {
           >
             <Label className="font-semibold mb-1 block">Your Notes</Label>
             <p className="text-xs text-muted-foreground mb-3">
-              Fill in as much or as little as you have — Claude will structure it into a full NDIS report.
+              Just write it like you&apos;d text a colleague — messy is fine. Claude turns it into a full audit-ready report.
             </p>
             <Textarea
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}
               placeholder={TEMPLATE}
-              rows={14}
-              className="text-sm font-mono resize-none"
+              rows={10}
+              className="text-sm resize-none"
             />
-            <p className="text-xs text-muted-foreground mt-2">
-              You can use the template above or write freely — just describe what happened.
-            </p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -379,7 +359,7 @@ export default function NewReportPage() {
             >
               {loading
                 ? <><Loader2 className="h-5 w-5 animate-spin" /> Generating Report…</>
-                : <><FileText className="h-5 w-5" /> Generate Report</>
+                : <><FileText className="h-5 w-5" /> Transform to Audit Evidence</>
               }
             </motion.button>
             {!title.trim() && (
