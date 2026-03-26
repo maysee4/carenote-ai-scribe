@@ -30,7 +30,8 @@ export default function NewReportPage() {
   const mediaRecorder = useRef<MediaRecorder | null>(null)
   const chunks = useRef<Blob[]>([])
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
-  const recognition = useRef<SpeechRecognition | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognition = useRef<any>(null)
   const finalTranscript = useRef('')
 
   const startRecording = useCallback(async () => {
@@ -48,8 +49,9 @@ export default function NewReportPage() {
       mediaRecorder.current = recorder
 
       // Live transcription via Web Speech API
-      const SpeechRecognitionAPI =
-        (typeof window !== 'undefined' && (window.SpeechRecognition || (window as Window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition)) || null
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const SpeechRecognitionAPI: any =
+        typeof window !== 'undefined' && ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
 
       if (SpeechRecognitionAPI) {
         const rec = new SpeechRecognitionAPI()
