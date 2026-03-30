@@ -15,7 +15,7 @@ export function Footer() {
 
           {/* Center */}
           <p className="text-sm text-center" style={{ color: '#a0b8c8' }}>
-            © 2026 CareNote AI. Built in Sydney for Australian SIL providers.
+            © 2026 CareNote AI. Built in Melbourne for Australian SIL providers.
           </p>
 
           {/* Right links */}
