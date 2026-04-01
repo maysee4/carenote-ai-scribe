@@ -14,11 +14,13 @@ import {
   Trash2,
   Plus,
   LogOut,
+  ClipboardList,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/reports', icon: FileText, label: 'Reports' },
+  { href: '/forms', icon: ClipboardList, label: 'Form Filler' },
   { href: '/clients', icon: Users, label: 'Clients' },
 ]
 
