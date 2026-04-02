@@ -20,6 +20,7 @@ export interface FormDefinition {
   accessLevel: 'support_worker' | 'nurse'
   description: string
   icon: string
+  instructions?: string
   sections: FormSection[]
 }
 
@@ -31,6 +32,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'support_worker',
     description: 'Client goal progress and service satisfaction',
     icon: '⭐',
+    instructions: 'Used every shift. Describe how the visit went, whether the client was satisfied, any goal progress observed, and any risks or concerns.',
     sections: [
       {
         fields: [
@@ -51,6 +53,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'support_worker',
     description: 'Bowel movement documentation and tracking',
     icon: '📋',
+    instructions: 'To be completed by all JBC staff when a participant requires bowel management support or when requested by a General Practitioner, Specialist, or Registered Nurse. Describe the bowel event including time, consistency, volume, and any blood or mucous observed.',
     sections: [
       {
         title: 'Bowel Entry',
@@ -87,6 +90,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'support_worker',
     description: 'Nutrition and hydration intake tracking',
     icon: '🥗',
+    instructions: 'Please ensure charts are reviewed regularly by a JBC registered nurse. Please report any change to a client\'s appetite or any concerns about the person\'s condition to your JBC office or registered nurse. Describe what the client ate and drank, meal times, and any fluid measurements.',
     sections: [
       {
         fields: [
@@ -114,6 +118,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'support_worker',
     description: 'Incident documentation and reporting',
     icon: '⚠️',
+    instructions: 'Used to record incidents involving customers directly — events, behaviours, or circumstances that occurred or are alleged to have occurred which impact on self or others, or have the potential to cause harm (e.g. a concern, refusal for service, breach of policy, missed medication, damage to personal belongings). Do NOT use this form to report staff injuries, hazards, or complaints. Describe what happened before, during, and after the incident.',
     sections: [
       {
         fields: [
@@ -166,6 +171,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'nurse',
     description: 'Critical incident documentation (Nurse/RN)',
     icon: '🚨',
+    instructions: 'For Nurse/RN use only. Describe the critical incident in full — what happened before, during and after, who was involved, who was notified, and any follow-up actions taken. Include names and roles where known.',
     sections: [
       {
         fields: [
@@ -243,6 +249,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'nurse',
     description: 'Comprehensive clinical assessment (RN only)',
     icon: '🏥',
+    instructions: 'Registered Nurse use only. Conducted with the participant present — takes approximately 1 hour. Screening questions guide the assessment. If a response indicates potential risk, apply clinical judgement. Describe the participant\'s full health status, history, functional capacity, medications, cognition, and any other relevant clinical findings.',
     sections: [
       {
         title: 'Section 1 — Intake/Consent',
@@ -605,6 +612,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'nurse',
     description: 'Home environment safety evaluation',
     icon: '🏠',
+    instructions: 'Nurse/RN use only. Walk through the home with the participant and describe what you observed — emergency exits, fire safety equipment, security, lighting, and any internal room-by-room risks identified. Note whether manual handling is involved and any risk management actions required.',
     sections: [
       {
         fields: [
@@ -683,6 +691,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'nurse',
     description: 'Home falls risk assessment — score out of 25',
     icon: '🚶',
+    instructions: 'Home FAST — completed at commencement and annually or sooner if clinically indicated. Score 1 point for each "No" response (total out of 25). Describe what you observed in the home for each area: floors, lighting, bathroom, kitchen, stairs, and mobility. Include any handrail or grab rail details.',
     sections: [
       {
         fields: [
@@ -755,6 +764,7 @@ export const FORMS: FormDefinition[] = [
     accessLevel: 'nurse',
     description: 'Care planning and review documentation',
     icon: '📝',
+    instructions: 'Used to record key details of care and services planning for Support at Home participants, including annual reviews. Describe the meeting — who attended, what was discussed, any areas of difficulty identified, clinical care considerations, medication management, and advance care planning status.',
     sections: [
       {
         fields: [
