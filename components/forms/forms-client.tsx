@@ -133,21 +133,21 @@ function FormStep({ forms, onSelect, role }: { forms: FormDefinition[]; onSelect
   )
 }
 
-// ─── Field type badge ─────────────────────────────────────────────────────────
+// ─── Field type icon ──────────────────────────────────────────────────────────
 
-function FieldTypeBadge({ type }: { type: FormField['type'] }) {
-  const map: Record<string, string> = {
-    yesno: 'Yes/No',
-    select: 'Select',
-    date: 'Date',
-    time: 'Time',
-    number: 'Number',
-    text: 'Text',
-    textarea: 'Text',
+function FieldTypeIcon({ type }: { type: FormField['type'] }) {
+  const icons: Record<string, string> = {
+    yesno: '☑',
+    select: '▾',
+    date: '📅',
+    time: '🕐',
+    number: '🔢',
+    text: '✏️',
+    textarea: '✏️',
   }
   return (
-    <span className="text-[10px] text-muted-foreground/60 font-mono shrink-0">
-      [{map[type] ?? type}]
+    <span className="shrink-0 text-base leading-none text-muted-foreground/70 mt-px w-6 text-center">
+      {icons[type] ?? '✏️'}
     </span>
   )
 }
@@ -246,12 +246,12 @@ function InputStep({
       <div className="rounded-xl border border-border overflow-hidden">
         <button
           onClick={() => setShowFields((v) => !v)}
-          className="w-full flex items-center justify-between px-4 py-3 text-left bg-muted/30 hover:bg-muted/50 transition-colors"
+          className="w-full flex items-center justify-between px-5 py-4 text-left bg-muted/30 hover:bg-muted/50 transition-colors"
         >
-          <span className="text-sm font-medium text-foreground">
+          <span className="text-lg font-bold text-foreground">
             What the AI will fill — {form.sections.flatMap((s) => s.fields).length} fields
           </span>
-          {showFields ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          {showFields ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
         </button>
 
         <AnimatePresence>
@@ -265,18 +265,28 @@ function InputStep({
             >
               <div className="divide-y divide-border">
                 {form.sections.map((section, si) => (
-                  <div key={si} className="px-4 py-3 space-y-2">
+                  <div key={si} className="px-5 py-4 space-y-0">
                     {section.title && (
-                      <div className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
+                      <div className="text-sm font-bold text-amber-700 uppercase tracking-wide mb-3">
                         {section.title}
                       </div>
                     )}
-                    {section.fields.map((field) => (
-                      <div key={field.id} className="flex items-start gap-2">
-                        <FieldTypeBadge type={field.type} />
-                        <span className="text-xs text-muted-foreground leading-relaxed">{field.label}</span>
+                    {section.fields.map((field, fi) => (
+                      <div
+                        key={field.id}
+                        className={cn(
+                          'flex items-center gap-3 py-3',
+                          fi < section.fields.length - 1 && 'border-b border-border/60'
+                        )}
+                      >
+                        <FieldTypeIcon type={field.type} />
+                        <span className="text-base font-medium text-foreground leading-snug flex-1">
+                          {field.label}
+                        </span>
                         {field.officeOnly && (
-                          <span className="shrink-0 text-[10px] bg-muted rounded px-1">office only</span>
+                          <span className="shrink-0 text-xs bg-muted text-muted-foreground rounded px-2 py-0.5">
+                            Office only
+                          </span>
                         )}
                       </div>
                     ))}
@@ -288,7 +298,7 @@ function InputStep({
         </AnimatePresence>
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[15px] font-medium text-muted-foreground">
         Speak naturally or type freely — the more detail you provide, the better the form will be filled.
       </p>
     </div>
