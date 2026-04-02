@@ -133,21 +133,23 @@ function FormStep({ forms, onSelect, role }: { forms: FormDefinition[]; onSelect
   )
 }
 
-// ─── Field type icon ──────────────────────────────────────────────────────────
+// ─── Field type pill ──────────────────────────────────────────────────────────
 
-function FieldTypeIcon({ type }: { type: FormField['type'] }) {
-  const icons: Record<string, string> = {
-    yesno: '☑',
-    select: '▾',
-    date: '📅',
-    time: '🕐',
-    number: '🔢',
-    text: '✏️',
-    textarea: '✏️',
+function FieldTypePill({ type }: { type: FormField['type'] }) {
+  const config: Record<string, { icon: string; label: string; colour: string }> = {
+    yesno:    { icon: '☑',  label: 'Yes / No',   colour: 'bg-green-50 text-green-700 border-green-200' },
+    select:   { icon: '▾',  label: 'Select',      colour: 'bg-blue-50 text-blue-700 border-blue-200' },
+    date:     { icon: '📅', label: 'Date',        colour: 'bg-purple-50 text-purple-700 border-purple-200' },
+    time:     { icon: '🕐', label: 'Time',        colour: 'bg-purple-50 text-purple-700 border-purple-200' },
+    number:   { icon: '🔢', label: 'Number',      colour: 'bg-orange-50 text-orange-700 border-orange-200' },
+    text:     { icon: '✏️', label: 'Text field',  colour: 'bg-amber-50 text-amber-700 border-amber-200' },
+    textarea: { icon: '✏️', label: 'Text field',  colour: 'bg-amber-50 text-amber-700 border-amber-200' },
   }
+  const c = config[type] ?? config.text
   return (
-    <span className="shrink-0 text-base leading-none text-muted-foreground/70 mt-px w-6 text-center">
-      {icons[type] ?? '✏️'}
+    <span className={cn('shrink-0 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold', c.colour)}>
+      <span className="text-sm leading-none">{c.icon}</span>
+      {c.label}
     </span>
   )
 }
@@ -275,19 +277,21 @@ function InputStep({
                       <div
                         key={field.id}
                         className={cn(
-                          'flex items-center gap-3 py-3',
+                          'flex items-start gap-3 py-3',
                           fi < section.fields.length - 1 && 'border-b border-border/60'
                         )}
                       >
-                        <FieldTypeIcon type={field.type} />
+                        <div className="pt-0.5 shrink-0">
+                          <FieldTypePill type={field.type} />
+                        </div>
                         <span className="text-base font-medium text-foreground leading-snug flex-1">
                           {field.label}
+                          {field.officeOnly && (
+                            <span className="ml-2 text-xs bg-muted text-muted-foreground rounded px-2 py-0.5 align-middle">
+                              Office only
+                            </span>
+                          )}
                         </span>
-                        {field.officeOnly && (
-                          <span className="shrink-0 text-xs bg-muted text-muted-foreground rounded px-2 py-0.5">
-                            Office only
-                          </span>
-                        )}
                       </div>
                     ))}
                   </div>
