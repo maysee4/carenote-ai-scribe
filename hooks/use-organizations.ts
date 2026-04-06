@@ -204,9 +204,15 @@ export function useIsOrgOwner() {
         .select('id')
         .eq('owner_id', user.id)
         .limit(1)
-      if (error) return false
+      if (error) {
+        console.warn('useIsOrgOwner error:', error.message)
+        return false
+      }
       return (data?.length ?? 0) > 0
     },
+    staleTime: 0,
+    refetchOnMount: true,
+    retry: 1,
   })
   return data ?? false
 }
