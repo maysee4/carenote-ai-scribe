@@ -1009,17 +1009,25 @@ function PreviewStep({
         {satisfactionState === 'editing' && (
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <label className="text-base font-medium text-foreground">Which section needs editing?</label>
+              <label className="text-base font-medium text-foreground">Which question or section needs editing?</label>
               <select
                 value={editSection}
                 onChange={(e) => setEditSection(e.target.value)}
                 className="w-full rounded-xl border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-amber-400 min-h-[48px]"
               >
-                <option value="">— Select a section —</option>
-                {form.sections.map((s, i) => (
-                  <option key={i} value={s.title || form.name}>{s.title || form.name}</option>
+                <option value="">— Select a question or section —</option>
+                <optgroup label="— Whole Form —">
+                  <option value="the whole form">The whole form</option>
+                </optgroup>
+                {form.sections.map((s, si) => (
+                  <optgroup key={si} label={s.title ? `── ${s.title}` : `── ${form.name}`}>
+                    {s.fields.filter(f => !f.officeOnly).map((field) => (
+                      <option key={field.id} value={field.label}>
+                        {field.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
-                <option value="the whole form">The whole form</option>
               </select>
             </div>
             <div className="space-y-1.5">

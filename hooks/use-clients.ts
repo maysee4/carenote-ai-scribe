@@ -44,19 +44,23 @@ export function useCreateClient() {
     mutationFn: async (client: Omit<Client, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
+      // Convert empty strings to null so Postgres date/text columns don't reject them
+      const cleaned = Object.fromEntries(
+        Object.entries(client).map(([k, v]) => [k, v === '' ? null : v])
+      )
       const { data, error } = await supabase
         .from('clients')
-        .insert({ ...client, user_id: user.id })
+        .insert({ ...cleaned, user_id: user.id })
         .select()
         .single()
-      if (error) throw error
+      if (error) { console.error('Create client error:', error); throw error }
       return data as Client
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients'] })
       toast.success('Client added')
     },
-    onError: () => toast.error('Failed to add client'),
+    onError: (e) => { console.error(e); toast.error('Failed to add client') },
   })
 }
 
@@ -65,13 +69,16 @@ export function useUpdateClient() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Client> & { id: string }) => {
+      const cleaned = Object.fromEntries(
+        Object.entries(updates).map(([k, v]) => [k, v === '' ? null : v])
+      )
       const { data, error } = await supabase
         .from('clients')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update({ ...cleaned, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single()
-      if (error) throw error
+      if (error) { console.error('Update client error:', error); throw error }
       return data as Client
     },
     onSuccess: (_, vars) => {
