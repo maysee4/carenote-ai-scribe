@@ -28,6 +28,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useClients } from '@/hooks/use-clients'
 import { useSaveForm } from '@/hooks/use-saved-forms'
+import { useVoiceInput } from '@/hooks/use-voice-input'
 
 type Role = 'support_worker' | 'nurse'
 type Step = 'role' | 'form' | 'client' | 'input' | 'filling' | 'stepwise' | 'preview'
@@ -253,11 +254,7 @@ function InputStep({
   form,
   description,
   setDescription,
-  isRecording,
-  onStartRecording,
-  onStopRecording,
   onGenerate,
-  isGenerating,
   fillMode,
   setFillMode,
   selectedClientName,
@@ -265,17 +262,14 @@ function InputStep({
   form: FormDefinition
   description: string
   setDescription: (v: string) => void
-  isRecording: boolean
-  onStartRecording: () => void
-  onStopRecording: () => void
   onGenerate: () => void
-  isGenerating: boolean
   fillMode: FillMode
   setFillMode: (m: FillMode) => void
   selectedClientName?: string
 }) {
   const [showFields, setShowFields] = useState(false)
   const example = EXAMPLE_PROMPTS[form.id] ?? ''
+  const voice = useVoiceInput((text) => setDescription(text))
 
   return (
     <div className="space-y-5">
@@ -349,13 +343,19 @@ function InputStep({
                 className={cn(
                   'w-full rounded-xl border bg-card px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/70',
                   'focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 resize-none transition-colors',
-                  isRecording && 'border-red-400 ring-2 ring-red-100'
+                  voice.isRecording && 'border-red-400 ring-2 ring-red-100'
                 )}
               />
-              {isRecording && (
+              {voice.isRecording && (
                 <div className="absolute top-3 right-3 flex items-center gap-1.5 text-sm text-red-600 bg-white/90 rounded-full px-2.5 py-1 border border-red-200">
                   <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                   Recording…
+                </div>
+              )}
+              {voice.isTranscribing && (
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 text-sm text-amber-700 bg-white/90 rounded-full px-2.5 py-1 border border-amber-200">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Transcribing…
                 </div>
               )}
             </div>
@@ -364,24 +364,27 @@ function InputStep({
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <button
-              onClick={isRecording ? onStopRecording : onStartRecording}
+              onClick={voice.isBusy ? voice.stop : voice.start}
+              disabled={voice.isTranscribing}
               className={cn(
                 'flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-base font-medium transition-colors min-h-[48px]',
-                isRecording
+                voice.isRecording
                   ? 'bg-red-500 text-white hover:bg-red-600'
+                  : voice.isTranscribing
+                  ? 'border border-amber-200 bg-amber-50 text-amber-700 cursor-not-allowed'
                   : 'border border-border bg-card text-foreground hover:border-amber-400 hover:text-amber-700'
               )}
             >
-              {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-              {isRecording ? 'Stop Recording' : 'Voice Input'}
+              {voice.isRecording ? <MicOff className="h-5 w-5" /> : voice.isTranscribing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Mic className="h-5 w-5" />}
+              {voice.isRecording ? 'Stop Recording' : voice.isTranscribing ? 'Transcribing…' : 'Voice Input'}
             </button>
 
             <button
               onClick={onGenerate}
-              disabled={!description.trim() || isGenerating}
+              disabled={!description.trim() || false}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
             >
-              {isGenerating ? (
+              {false ? (
                 <><Loader2 className="h-5 w-5 animate-spin" />Starting…</>
               ) : (
                 <><Sparkles className="h-5 w-5" />Fill Form with AI</>
@@ -574,40 +577,10 @@ function StepwiseStep({
   const [currentIdx, setCurrentIdx] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [currentAnswer, setCurrentAnswer] = useState('')
-  const [isRecording, setIsRecording] = useState(false)
-  const recognitionRef = useRef<any>(null)
+  const voice = useVoiceInput((text) => setCurrentAnswer(text))
 
   const currentField = allFields[currentIdx]
   const progress = Math.round(((currentIdx) / allFields.length) * 100)
-
-  function startRecording() {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SR) { toast.error('Voice not supported in this browser.'); return }
-    const r = new SR()
-    r.continuous = true
-    r.interimResults = true
-    r.lang = 'en-AU'
-    let committed = ''
-    r.onresult = (event: any) => {
-      committed = ''
-      let interim = ''
-      for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) committed += event.results[i][0].transcript + ' '
-        else interim += event.results[i][0].transcript
-      }
-      setCurrentAnswer(committed + interim)
-    }
-    r.onerror = () => { setIsRecording(false) }
-    r.onend = () => { setIsRecording(false); if (committed.trim()) setCurrentAnswer(committed.trim()) }
-    recognitionRef.current = r
-    r.start()
-    setIsRecording(true)
-  }
-
-  function stopRecording() {
-    recognitionRef.current?.stop()
-    setIsRecording(false)
-  }
 
   function handleNext() {
     const newAnswers = { ...answers, [currentField.id]: currentAnswer.trim() }
@@ -681,13 +654,19 @@ function StepwiseStep({
               className={cn(
                 'w-full rounded-xl border bg-white px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/70',
                 'focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 resize-none',
-                isRecording && 'border-red-400 ring-2 ring-red-100'
+                voice.isRecording && 'border-red-400 ring-2 ring-red-100'
               )}
             />
-            {isRecording && (
+            {voice.isRecording && (
               <div className="absolute top-3 right-3 flex items-center gap-1.5 text-sm text-red-600 bg-white rounded-full px-2.5 py-1 border border-red-200">
                 <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                 Recording…
+              </div>
+            )}
+            {voice.isTranscribing && (
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 text-sm text-amber-700 bg-white rounded-full px-2.5 py-1 border border-amber-200">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Transcribing…
               </div>
             )}
           </div>
@@ -695,16 +674,19 @@ function StepwiseStep({
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
             <button
-              onClick={isRecording ? stopRecording : startRecording}
+              onClick={voice.isBusy ? voice.stop : voice.start}
+              disabled={voice.isTranscribing}
               className={cn(
                 'flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-base font-medium transition-colors min-h-[48px]',
-                isRecording
+                voice.isRecording
                   ? 'bg-red-500 text-white hover:bg-red-600'
+                  : voice.isTranscribing
+                  ? 'border border-amber-200 bg-amber-50 text-amber-700 cursor-not-allowed'
                   : 'border border-border bg-white text-foreground hover:border-amber-400 hover:text-amber-700'
               )}
             >
-              {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-              {isRecording ? 'Stop' : 'Voice'}
+              {voice.isRecording ? <MicOff className="h-5 w-5" /> : voice.isTranscribing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Mic className="h-5 w-5" />}
+              {voice.isRecording ? 'Stop' : voice.isTranscribing ? 'Transcribing…' : 'Voice'}
             </button>
 
             <button
@@ -1099,12 +1081,10 @@ export function FormsClient() {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
   const [selectedClientName, setSelectedClientName] = useState<string | null>(null)
   const [description, setDescription] = useState('')
-  const [isRecording, setIsRecording] = useState(false)
   const [filledFields, setFilledFields] = useState<Record<string, string>>({})
   const [filledCount, setFilledCount] = useState(0)
   const [copied, setCopied] = useState(false)
   const [fillMode, setFillMode] = useState<FillMode>('standard')
-  const recognitionRef = useRef<any>(null)
   const abortRef = useRef<AbortController | null>(null)
 
   const { mutate: saveForm, isPending: isSaving } = useSaveForm()
@@ -1162,34 +1142,6 @@ export function FormsClient() {
     }
   }
 
-  function startRecording() {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SR) { toast.error('Voice input not supported in this browser. Please type your description.'); return }
-    const recognition = new SR()
-    recognition.continuous = true
-    recognition.interimResults = true
-    recognition.lang = 'en-AU'
-    let committed = ''
-    recognition.onresult = (event: any) => {
-      committed = ''
-      let interim = ''
-      for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) committed += event.results[i][0].transcript + ' '
-        else interim += event.results[i][0].transcript
-      }
-      setDescription(committed + interim)
-    }
-    recognition.onerror = () => { setIsRecording(false); toast.error('Voice recording error.') }
-    recognition.onend = () => { setIsRecording(false); if (committed.trim()) setDescription(committed.trim()) }
-    recognitionRef.current = recognition
-    recognition.start()
-    setIsRecording(true)
-  }
-
-  function stopRecording() {
-    recognitionRef.current?.stop()
-    setIsRecording(false)
-  }
 
   async function runFormFill(prompt: string): Promise<Record<string, string>> {
     if (!selectedForm) throw new Error('No form selected')
@@ -1402,11 +1354,7 @@ export function FormsClient() {
               form={selectedForm}
               description={description}
               setDescription={setDescription}
-              isRecording={isRecording}
-              onStartRecording={startRecording}
-              onStopRecording={stopRecording}
               onGenerate={generateForm}
-              isGenerating={false}
               fillMode={fillMode}
               setFillMode={setFillMode}
               selectedClientName={selectedClientName ?? undefined}
