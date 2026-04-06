@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { initials, formatDate } from '@/lib/utils'
+import { initials, formatDate, formatDateTime } from '@/lib/utils'
 import {
   ArrowLeft, Edit2, Check, X, Trash2, Plus, ChevronDown, ChevronUp,
   BookOpen, ClipboardList, Brain, Calendar, AlertCircle,
@@ -395,66 +395,100 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                     <p>No saved forms yet.</p>
                     <p className="text-sm mt-1">Complete a form in the Form Filler and save it to this client.</p>
                   </div>
-                ) : (
-                  <div className="divide-y divide-border">
-                    {savedForms.map((sf) => (
-                      <div key={sf.id}>
-                        <button
-                          onClick={() => setExpandedForm(expandedForm === sf.id ? null : sf.id)}
-                          className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/20 transition-colors"
-                        >
-                          <div>
-                            <p className="text-base font-semibold text-foreground">{sf.form_name}</p>
-                            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
-                              <Calendar className="h-3.5 w-3.5" />
-                              {formatDate(sf.created_at)}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); deleteSavedForm({ id: sf.id, clientId: id }) }}
-                              className="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                            {expandedForm === sf.id ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
-                          </div>
-                        </button>
+                ) : (() => {
+                  // Group forms by form_id so multiples of the same type appear together
+                  const grouped = savedForms.reduce<Record<string, typeof savedForms>>((acc, sf) => {
+                    if (!acc[sf.form_id]) acc[sf.form_id] = []
+                    acc[sf.form_id].push(sf)
+                    return acc
+                  }, {})
 
-                        <AnimatePresence>
-                          {expandedForm === sf.id && (
-                            <motion.div
-                              initial={{ height: 0 }}
-                              animate={{ height: 'auto' }}
-                              exit={{ height: 0 }}
-                              transition={{ duration: 0.15 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="px-5 pb-5 border-t border-border space-y-3 pt-3">
-                                {sf.original_prompt && (
-                                  <div className="rounded-xl bg-muted/30 px-4 py-3">
-                                    <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-1">Original Description</p>
-                                    <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{sf.original_prompt}</p>
+                  return (
+                    <div className="divide-y divide-border">
+                      {Object.entries(grouped).map(([formId, entries]) => (
+                        <div key={formId}>
+                          {/* Form type header */}
+                          <div className="px-5 py-3 bg-muted/20 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <ClipboardList className="h-4 w-4 text-amber-600 shrink-0" />
+                              <span className="text-base font-bold text-foreground">{entries[0].form_name}</span>
+                            </div>
+                            <span className="text-sm text-muted-foreground bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5 font-medium">
+                              {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+                            </span>
+                          </div>
+
+                          {/* Each individual submission */}
+                          {entries.map((sf, entryIdx) => (
+                            <div key={sf.id} className="border-t border-border/50">
+                              <button
+                                onClick={() => setExpandedForm(expandedForm === sf.id ? null : sf.id)}
+                                className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-muted/20 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
+                                    {entries.length - entryIdx}
                                   </div>
-                                )}
-                                <div className="space-y-2">
-                                  {Object.entries(sf.form_fields)
-                                    .filter(([, v]) => v && String(v).trim())
-                                    .map(([k, v]) => (
-                                      <div key={k} className="flex gap-3">
-                                        <span className="text-sm text-muted-foreground shrink-0 min-w-[140px]">{k.replace(/_/g, ' ')}</span>
-                                        <span className="text-sm font-medium text-foreground">{String(v)}</span>
-                                      </div>
-                                    ))}
+                                  <div>
+                                    <p className="text-base font-medium text-foreground flex items-center gap-1.5">
+                                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                      {formatDateTime(sf.created_at)}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                      {Object.values(sf.form_fields).filter(v => v && String(v).trim()).length} fields filled
+                                    </p>
+                                  </div>
                                 </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); deleteSavedForm({ id: sf.id, clientId: id }) }}
+                                    className="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                  {expandedForm === sf.id
+                                    ? <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                                    : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+                                </div>
+                              </button>
+
+                              <AnimatePresence>
+                                {expandedForm === sf.id && (
+                                  <motion.div
+                                    initial={{ height: 0 }}
+                                    animate={{ height: 'auto' }}
+                                    exit={{ height: 0 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <div className="px-5 pb-5 border-t border-border space-y-3 pt-3">
+                                      {sf.original_prompt && (
+                                        <div className="rounded-xl bg-muted/30 px-4 py-3">
+                                          <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-1">Original Description</p>
+                                          <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{sf.original_prompt}</p>
+                                        </div>
+                                      )}
+                                      <div className="space-y-2">
+                                        {Object.entries(sf.form_fields)
+                                          .filter(([, v]) => v && String(v).trim())
+                                          .map(([k, v]) => (
+                                            <div key={k} className="flex gap-3">
+                                              <span className="text-sm text-muted-foreground shrink-0 min-w-[140px] capitalize">{k.replace(/_/g, ' ')}</span>
+                                              <span className="text-sm font-medium text-foreground">{String(v)}</span>
+                                            </div>
+                                          ))}
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
               </div>
             )}
           </div>
