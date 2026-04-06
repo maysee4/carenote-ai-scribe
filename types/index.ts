@@ -58,3 +58,32 @@ export interface ClientKnowledge {
 }
 
 export type ReportStatus = Report['status']
+
+export interface Organization {
+  id: string
+  owner_id: string
+  name: string
+  description?: string | null
+  address?: string | null
+  created_at: string
+}
+
+export interface OrganizationMember {
+  id: string
+  organization_id: string
+  user_id: string
+  role: 'admin' | 'nurse' | 'support_worker'
+  full_name: string
+  email: string
+  created_at: string
+}
+
+export interface ActivityLog {
+  id: string
+  organization_id: string
+  user_id: string
+  user_name: string
+  action: string
+  details: Record<string, any>
+  created_at: string
+}

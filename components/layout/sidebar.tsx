@@ -15,7 +15,9 @@ import {
   Plus,
   LogOut,
   ClipboardList,
+  Building2,
 } from 'lucide-react'
+import { useIsOrgOwner } from '@/hooks/use-organizations'
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -33,6 +35,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const isOrgOwner = useIsOrgOwner()
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -94,6 +97,23 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             </motion.div>
           )
         })}
+        {isOrgOwner && (
+          <motion.div whileHover={{ x: 2 }} transition={{ duration: 0.15 }}>
+            <Link
+              href="/admin"
+              onClick={onClose}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-3 text-base transition-colors',
+                pathname === '/admin' || pathname.startsWith('/admin/')
+                  ? 'bg-[hsl(215,25%,33%)] text-white'
+                  : 'text-[hsl(210,20%,75%)] hover:bg-[hsl(215,25%,33%)] hover:text-white'
+              )}
+            >
+              <Building2 className="h-5 w-5 shrink-0" />
+              Admin
+            </Link>
+          </motion.div>
+        )}
       </nav>
 
       {/* Bottom nav */}

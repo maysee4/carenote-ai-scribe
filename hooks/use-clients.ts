@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import type { Client } from '@/types'
 import { toast } from 'sonner'
+import { logActivity } from '@/lib/log-activity'
 
 export function useClients() {
   const supabase = createClient()
@@ -56,9 +57,10 @@ export function useCreateClient() {
       if (error) { console.error('Create client error:', error); throw error }
       return data as Client
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['clients'] })
       toast.success('Client added')
+      logActivity('client_added', { client_name: data.name, client_id: data.id })
     },
     onError: (e) => { console.error(e); toast.error('Failed to add client') },
   })

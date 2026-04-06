@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import type { SavedForm, ClientKnowledge } from '@/types'
 import { toast } from 'sonner'
+import { logActivity } from '@/lib/log-activity'
 
 // ─── Saved Forms ─────────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ export function useSaveForm() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['saved-forms', data.client_id] })
       toast.success('Form saved to client!')
+      logActivity('form_saved', { form_name: data.form_name, client_id: data.client_id })
     },
     onError: () => toast.error('Failed to save form'),
   })
