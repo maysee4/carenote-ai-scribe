@@ -39,7 +39,7 @@ export default function ReportViewPage({ params }: { params: Promise<{ id: strin
 
   if (isLoading) {
     return (
-      <div className="p-8 max-w-4xl mx-auto">
+      <div className="p-4 md:p-8 max-w-4xl mx-auto">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-64" />
           <div className="h-4 bg-muted rounded w-48" />
@@ -59,7 +59,7 @@ export default function ReportViewPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-start gap-3">

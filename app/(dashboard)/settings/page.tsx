@@ -53,7 +53,7 @@ export default function SettingsPage() {
   const name = user?.user_metadata?.full_name || user?.email || 'User'
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
+    <div className="p-4 md:p-8 max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your account preferences.</p>

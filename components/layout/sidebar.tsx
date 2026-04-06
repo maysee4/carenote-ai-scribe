@@ -29,7 +29,7 @@ const bottomItems = [
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
 
-export function Sidebar() {
+export function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -44,10 +44,19 @@ export function Sidebar() {
     <aside className="flex h-full w-64 flex-col bg-[hsl(215,25%,27%)]">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-[hsl(215,25%,22%)]">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden bg-white/10">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden bg-white/10 shrink-0">
           <Image src="/logos/carenote.png" alt="CareNote" width={28} height={28} className="object-contain" />
         </div>
-        <span className="text-[15px] font-semibold text-white">CareNote<span style={{ color: '#4db8aa' }}>.</span></span>
+        <span className="text-[15px] font-semibold text-white flex-1">CareNote<span style={{ color: '#4db8aa' }}>.</span></span>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="flex items-center justify-center h-8 w-8 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+            aria-label="Close menu"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        )}
       </div>
 
       {/* New Report button */}
@@ -71,14 +80,15 @@ export function Sidebar() {
             <motion.div key={item.href} whileHover={{ x: 2 }} transition={{ duration: 0.15 }}>
               <Link
                 href={item.href}
+                onClick={onClose}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
+                  'flex items-center gap-3 rounded-lg px-3 py-3 text-base transition-colors',
                   active
                     ? 'bg-[hsl(215,25%,33%)] text-white'
                     : 'text-[hsl(210,20%,75%)] hover:bg-[hsl(215,25%,33%)] hover:text-white'
                 )}
               >
-                <item.icon className="h-4 w-4 shrink-0" />
+                <item.icon className="h-5 w-5 shrink-0" />
                 {item.label}
               </Link>
             </motion.div>
@@ -94,14 +104,15 @@ export function Sidebar() {
             <motion.div key={item.href} whileHover={{ x: 2 }} transition={{ duration: 0.15 }}>
               <Link
                 href={item.href}
+                onClick={onClose}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
+                  'flex items-center gap-3 rounded-lg px-3 py-3 text-base transition-colors',
                   active
                     ? 'bg-[hsl(215,25%,33%)] text-white'
                     : 'text-[hsl(210,20%,75%)] hover:bg-[hsl(215,25%,33%)] hover:text-white'
                 )}
               >
-                <item.icon className="h-4 w-4 shrink-0" />
+                <item.icon className="h-5 w-5 shrink-0" />
                 {item.label}
               </Link>
             </motion.div>

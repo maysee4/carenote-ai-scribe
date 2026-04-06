@@ -11,7 +11,7 @@ export default function DeletedPage() {
   const { mutate: permanentlyDelete } = usePermanentlyDeleteReport()
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Deleted Reports</h1>
         <p className="text-sm text-muted-foreground mt-1">Items here are soft-deleted and can be restored.</p>

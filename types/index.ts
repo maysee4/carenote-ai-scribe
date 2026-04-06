@@ -6,6 +6,7 @@ export interface Client {
   phone?: string | null
   date_of_birth?: string | null
   notes?: string | null
+  description?: string | null
   created_at: string
   updated_at: string
 }
@@ -32,6 +33,27 @@ export interface UserProfile {
   organization?: string | null
   role?: string | null
   avatar_url?: string | null
+  created_at: string
+}
+
+export interface SavedForm {
+  id: string
+  user_id: string
+  client_id: string
+  form_id: string
+  form_name: string
+  form_fields: Record<string, string>
+  original_prompt?: string | null
+  created_at: string
+}
+
+export interface ClientKnowledge {
+  id: string
+  user_id: string
+  client_id: string
+  category: 'health' | 'medications' | 'preferences' | 'risks' | 'general'
+  content: string
+  source?: string | null
   created_at: string
 }
 

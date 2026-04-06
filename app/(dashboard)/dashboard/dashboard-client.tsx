@@ -24,7 +24,7 @@ const statusVariant: Record<string, 'default' | 'processing' | 'success' | 'warn
 
 export function DashboardClient({ recentReports, totalReports, totalClients, userName }: Props) {
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
