@@ -5,14 +5,14 @@ import { Menu, X } from 'lucide-react'
 import { Sidebar } from './sidebar'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({ children, isOrgOwner = false }: { children: React.ReactNode; isOrgOwner?: boolean }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="flex h-full">
       {/* Desktop sidebar */}
       <div className="hidden md:flex">
-        <Sidebar />
+        <Sidebar isOrgOwner={isOrgOwner} />
       </div>
 
       {/* Mobile sidebar overlay */}
@@ -38,7 +38,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed left-0 top-0 bottom-0 z-50 md:hidden"
             >
-              <Sidebar onClose={() => setSidebarOpen(false)} />
+              <Sidebar isOrgOwner={isOrgOwner} onClose={() => setSidebarOpen(false)} />
             </motion.div>
           </>
         )}

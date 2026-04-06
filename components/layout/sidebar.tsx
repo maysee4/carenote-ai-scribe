@@ -17,7 +17,6 @@ import {
   ClipboardList,
   Building2,
 } from 'lucide-react'
-import { useIsOrgOwner } from '@/hooks/use-organizations'
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -31,11 +30,10 @@ const bottomItems = [
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
 
-export function Sidebar({ onClose }: { onClose?: () => void }) {
+export function Sidebar({ onClose, isOrgOwner = false }: { onClose?: () => void; isOrgOwner?: boolean }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
-  const isOrgOwner = useIsOrgOwner()
 
   async function handleSignOut() {
     await supabase.auth.signOut()
