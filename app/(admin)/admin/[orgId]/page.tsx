@@ -166,7 +166,7 @@ function AddStaffDialog({
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
                 placeholder="e.g. Jane Smith"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white dark:placeholder-gray-500"
                 required
               />
             </div>
@@ -179,7 +179,7 @@ function AddStaffDialog({
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="jane@clinic.com"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white dark:placeholder-gray-500"
                 required
               />
             </div>
@@ -192,7 +192,7 @@ function AddStaffDialog({
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Create a password for them"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-mono text-gray-900 placeholder-gray-400 placeholder:font-sans focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-mono text-gray-900 placeholder-gray-400 placeholder:font-sans focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white dark:placeholder-gray-500"
                 required
                 minLength={6}
               />
@@ -205,7 +205,7 @@ function AddStaffDialog({
               <select
                 value={role}
                 onChange={e => setRole(e.target.value as 'nurse' | 'support_worker')}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white dark:placeholder-gray-500"
               >
                 <option value="nurse">Nurse / RN</option>
                 <option value="support_worker">Support Worker</option>
