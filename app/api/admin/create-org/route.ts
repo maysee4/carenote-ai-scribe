@@ -29,11 +29,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Mark user as org owner in auth metadata so sidebar shows Admin link instantly
-    const adminSupabase = createAdminClient()
-    await adminSupabase.auth.admin.updateUserById(user.id, {
-      user_metadata: { ...user.user_metadata, is_org_owner: true },
-    })
+    // Mark user as org owner in auth metadata so sidebar shows Admin link
+    try {
+      const adminSupabase = createAdminClient()
+      await adminSupabase.auth.admin.updateUserById(user.id, {
+        user_metadata: { ...user.user_metadata, is_org_owner: true },
+      })
+    } catch {
+      // Non-fatal — clinic was created, metadata update failed silently
+    }
 
     return NextResponse.json(data)
   } catch (e: any) {
