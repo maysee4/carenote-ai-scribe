@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -27,6 +28,12 @@ export async function POST(request: NextRequest) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
+
+    // Mark user as org owner in auth metadata so sidebar shows Admin link instantly
+    const adminSupabase = createAdminClient()
+    await adminSupabase.auth.admin.updateUserById(user.id, {
+      user_metadata: { ...user.user_metadata, is_org_owner: true },
+    })
 
     return NextResponse.json(data)
   } catch (e: any) {
