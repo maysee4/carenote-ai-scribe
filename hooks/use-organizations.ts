@@ -71,6 +71,48 @@ export function useCreateOrganization() {
   })
 }
 
+// ─── Update Organization ──────────────────────────────────────────────────────
+
+export function useUpdateOrganization() {
+  const supabase = createClient()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, name, description, address }: { id: string; name: string; description?: string | null; address?: string | null }) => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .update({ name, description: description ?? null, address: address ?? null })
+        .eq('id', id)
+        .select()
+        .single()
+      if (error) throw error
+      return data as Organization
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['organizations', 'mine'] })
+      toast.success('Clinic updated')
+    },
+    onError: () => toast.error('Failed to update clinic'),
+  })
+}
+
+// ─── Delete Organization ──────────────────────────────────────────────────────
+
+export function useDeleteOrganization() {
+  const supabase = createClient()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('organizations').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['organizations', 'mine'] })
+      toast.success('Clinic deleted')
+    },
+    onError: () => toast.error('Failed to delete clinic'),
+  })
+}
+
 // ─── Org Members ──────────────────────────────────────────────────────────────
 
 export function useOrgMembers(orgId: string) {
