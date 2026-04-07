@@ -55,7 +55,7 @@ function CreateClinicDialog({
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Sunrise Care Clinic"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white dark:placeholder-gray-500"
               required
             />
           </div>
@@ -80,7 +80,7 @@ function CreateClinicDialog({
               value={address}
               onChange={e => setAddress(e.target.value)}
               placeholder="e.g. 123 Care St, Sydney NSW"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-[hsl(215,25%,30%)] dark:bg-[hsl(215,25%,20%)] dark:text-white dark:placeholder-gray-500"
             />
           </div>
           <div className="flex gap-3 pt-2">
