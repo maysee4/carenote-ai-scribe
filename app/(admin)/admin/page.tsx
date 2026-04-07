@@ -120,12 +120,10 @@ function ClinicCard({ org }: { org: Organization }) {
             {org.description && (
               <p className="mt-1 text-base text-gray-500 line-clamp-2 dark:text-gray-400">{org.description}</p>
             )}
-            {org.address && (
-              <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500">
-                <MapPin className="h-4 w-4 shrink-0" />
-                <span className="truncate">{org.address}</span>
-              </div>
-            )}
+            <div className="mt-2 flex items-center gap-1.5 text-sm dark:text-gray-500 text-gray-400">
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span className="truncate">{org.address || 'No address set'}</span>
+            </div>
           </div>
         </div>
         <div className="mt-5 flex items-center justify-between border-t border-gray-50 pt-4 dark:border-[hsl(215,25%,22%)]">
