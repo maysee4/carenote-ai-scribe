@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: createError?.message || 'Failed to create user' }, { status: 500 })
     }
 
-    // Insert into organization_members using regular server client
-    const { data: member, error: memberError } = await supabase
+    // Insert into organization_members using admin client to bypass RLS
+    const { data: member, error: memberError } = await adminSupabase
       .from('organization_members')
       .insert({
         organization_id: organizationId,
